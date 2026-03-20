@@ -9,19 +9,14 @@
 
     <script type="text/javascript">
         var player;
-        var playersPlayingTmp = [];
         var isInitialized = false;
-        var isPaused = false;
 
         function loadTour()
         {
             if(player) return;
 
-            var beginFunc = function(event){
-                if(event.sourceClassName == "MediaAudio") return;
-
+            var beginFunc = function(){
                 isInitialized = true;
-                disposePreloader();
                 onVirtualTourLoaded();
             };
 
@@ -32,54 +27,40 @@
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
             player.bind('stateChange', beginFunc, player, true);
-
-            player.bindOnObject('rootPlayer', 'start', function(){
-                var root = player.getById('rootPlayer');
-                if(root) {
-                    root.setMainMediaByIndex(0);
-                }
-            });
         }
 
-        function getSceneFromURL() {
+        // 🔥 ĐỌC URL
+        function getSceneIndex() {
             var params = {};
             location.search.substr(1).split("&").forEach(function(item) {
                 if (!item) return;
                 var parts = item.split("=");
                 params[parts[0]] = decodeURIComponent(parts[1]);
             });
-            return params.scene;
+
+            if (!params.scene) return null;
+
+            var index = parseInt(params.scene) - 1;
+            return isNaN(index) ? null : index;
         }
 
+        // 🔥 FIX CHÍNH Ở ĐÂY
         function onVirtualTourLoaded()
         {
-            if(isPaused) pauseTour();
+            var index = getSceneIndex();
+            if (index === null) return;
 
-            // 🔥 FIX QUAN TRỌNG NHẤT
-            var scene = getSceneFromURL();
+            // lấy playlist thật
+            var playLists = player.getByClassName('PlayList');
 
-            if (scene) {
-                var index = parseInt(scene) - 1;
+            if (playLists.length > 0) {
+                var playList = playLists[0];
 
-                if (!isNaN(index)) {
-                    setTimeout(function(){
-                        var root = player.getById('rootPlayer');
-                        if(root){
-                            root.setMainMediaByIndex(index);
-                            console.log("Loaded scene:", index);
-                        }
-                    }, 800);
-                }
-            }
-        }
-
-        function pauseTour(){}
-
-        function disposePreloader()
-        {
-            var preloadContainer = document.getElementById('preloadContainer');
-            if(preloadContainer){
-                preloadContainer.style.display = 'none';
+                // delay để tránh bị ghi đè
+                setTimeout(function(){
+                    playList.set('selectedIndex', index);
+                    console.log("Loaded scene index:", index);
+                }, 1000);
             }
         }
 
@@ -103,9 +84,6 @@
 </head>
 
 <body onload="onLoad()">
-    <div id="preloadContainer" style="background:#fff;position:absolute;width:100%;height:100%;z-index:2;text-align:center;padding-top:20%;">
-        Loading virtual tour...
-    </div>
     <div id="viewer"></div>
 </body>
 </html>
