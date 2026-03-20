@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>3DVista Virtual Tour - Personalized URL</title>
+    <title>3DVista Tour - Custom URL</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=0.5, width=device-width, viewport-fit=cover" />
+    <link rel="preload" href="script.js?v=1773937233406" as="script"/>
     <script src="lib/tdvplayer.js?v=1773937233406"></script>
     <script type="text/javascript">
         var player;
@@ -14,20 +15,21 @@
         function loadTour() {
             if(player) return;
 
-            var beginFunc = function(event){
+            var beginFunc = function(event) {
                 isInitialized = true;
                 player.unbind('preloadMediaShow', beginFunc, player, true);
                 disposePreloader();
                 
-                // --- PHẦN MỚI: TỰ ĐỘNG CẬP NHẬT URL KHI ĐỔI CẢNH ---
+                // --- CHUYÊN MỤC TỰ ĐỘNG CẬP NHẬT URL ---
+                // Mỗi khi bạn chuyển cảnh, code này sẽ lấy "Name" bạn đặt trong 3DVista gán lên link
                 player.bind('stateChange', function(e) {
                     var root = getRootPlayer();
                     if (root) {
                         var currentMedia = root.get('mainMedia');
                         if (currentMedia) {
                             var mediaName = currentMedia.get('media').get('name');
-                            // Cập nhật URL mà không làm load lại trang
                             var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?media-name=' + encodeURIComponent(mediaName);
+                            // Cập nhật thanh địa chỉ mà không làm load lại trang
                             window.history.replaceState({path: newUrl}, '', newUrl);
                         }
                     }
@@ -43,26 +45,23 @@
             
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
             player.bind('preloadMediaShow', beginFunc, player, true);
-            
-            player.bindOnObject('rootPlayer', 'start', function(e){
-                var queryDict = {}; 
-                location.search.substr(1).split("&").forEach(function(item) {
-                    var parts = item.split("=");
-                    if(parts.length > 1) queryDict[parts[0]] = decodeURIComponent(parts[1]);
-                });
 
-                // --- PHẦN ĐỌC URL KHI MỞ TRANG ---
-                if("media-name" in queryDict){
-                    setMediaByName(queryDict["media-name"]);
-                } else if("media-index" in queryDict){
-                    setMediaByIndex(parseInt(queryDict["media-index"]) - 1);
+            // --- CHUYÊN MỤC ĐỌC URL ĐỂ MỞ ĐÚNG ẢNH ---
+            player.bindOnObject('rootPlayer', 'start', function(e) {
+                var urlParams = new URLSearchParams(window.location.search);
+                var mName = urlParams.get('media-name');
+                
+                if (mName) {
+                    // Nếu link có ?media-name=... thì ép tour mở ảnh đó
+                    setMediaByName(mName);
                 } else {
+                    // Nếu không có thì mở ảnh đầu tiên mặc định
                     setMediaByIndex(0);
                 }
             }, player, false);
         }
 
-        // --- CÁC HÀM HỖ TRỢ CỦA 3DVISTA ---
+        // Các hàm điều khiển hệ thống 3DVista
         function getRootPlayer() {
             return window.tdvplayer !== undefined ? window.tdvplayer.getById('rootPlayer') : undefined;
         }
@@ -81,7 +80,7 @@
             var preloadContainer = document.getElementById('preloadContainer');
             if(preloadContainer) {
                 preloadContainer.style.opacity = 0;
-                setTimeout(function(){ 
+                setTimeout(function() { 
                     preloadContainer.style.visibility = 'hidden'; 
                     preloadContainer.style.display = 'none'; 
                 }, 500);
@@ -93,15 +92,15 @@
         }
     </script>
     <style type="text/css">
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        #viewer { background-color: #000000; position:absolute; width: 100%; height: 100%; top: 0; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+        #viewer { position:absolute; width: 100%; height: 100%; top: 0; z-index:1; }
         #preloadContainer { z-index:2; position:relative; width:100%; height:100%; transition: opacity 0.5s; background-color: #fff; }
     </style>
 </head>
 <body onload="onLoad()">
     <div id="preloadContainer">
-        <div style="position: absolute; top: 50%; width: 100%; text-align: center;">
-            Loading virtual tour...
+        <div style="position: absolute; top: 50%; width: 100%; text-align: center; font-family: Arial;">
+            Đang tải Tour 360... vui lòng đợi.
         </div>
     </div>
     <div id="viewer"></div>
