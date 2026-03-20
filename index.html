@@ -39,24 +39,25 @@
             player.bind('stateChange', beginFunc, player, true);
 
             player.bindOnObject('rootPlayer', 'start', function(e){
-                // --- ĐOẠN 1: ĐỌC URL ĐỂ NHẢY ĐÚNG ẢNH ---
                 var queryDict = {}; location.search.substr(1).split("&").forEach(function(item) {var k = item.split("=")[0], v = decodeURIComponent(item.split("=")[1]);queryDict[k] = v});
+                
+                // --- CHÈN ĐOẠN NÀY ĐỂ TỰ NHẢY CẢNH KHI MỞ LINK ---
                 if("media-name" in queryDict){
                     setMediaByName(queryDict["media-name"]);
                 } else {
                     setMediaByIndex(0);
                 }
 
-                // --- ĐOẠN 2: TỰ ĐỘNG ĐỔI URL THEO TÊN RIÊNG ---
+                // --- ĐOẠN CƯỠNG CHẾ ĐỔI URL THEO TÊN RIÊNG CỦA BẠN ---
                 setInterval(function() {
                     var root = getRootPlayer();
                     if (root && root.get('mainMedia')) {
                         var name = root.get('mainMedia').get('media').get('name');
-                        if (window.location.search.indexOf(encodeURIComponent(name)) === -1) {
+                        if (!window.location.search.includes(encodeURIComponent(name))) {
                             window.history.replaceState(null, '', '?media-name=' + encodeURIComponent(name));
                         }
                     }
-                }, 1000);
+                }, 1000); 
 
             }, player, false);
         }
@@ -69,22 +70,21 @@
             var preloadContainer = document.getElementById('preloadContainer');
             if(preloadContainer) {
                 preloadContainer.style.opacity = 0;
-                setTimeout(function(){ preloadContainer.style.display = 'none'; }, 500);
+                setTimeout(function(){ preloadContainer.style.visibility = 'hidden'; preloadContainer.style.display = 'none'; }, 500);
             }
         }
 
         function onVirtualTourLoaded() {}
-        function onLoad() { showPreloader(); loadTour(); }
-        function showPreloader() { document.getElementById('preloadContainer').style.opacity = 1; }
+        function onLoad() { loadTour(); }
     </script>
     <style type="text/css">
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        #viewer { background-color: #000; position:absolute; width: 100%; height: 100%; top: 0; z-index:1; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+        #viewer { position:absolute; width: 100%; height: 100%; top: 0; z-index:1; }
         #preloadContainer { z-index:2; position:relative; width:100%; height:100%; transition: opacity 0.5s; background-color: #fff; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body onload="onLoad()">
-    <div id="preloadContainer">Đang tải Tour 360 Pà Cò...</div>
+    <div id="preloadContainer">Loading...</div>
     <div id="viewer"></div>
 </body>
 </html>
