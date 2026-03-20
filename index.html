@@ -37,14 +37,6 @@
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
             player.bind('preloadMediaShow', beginFunc, player, true);
             player.bind('stateChange', beginFunc, player, true);
-
-            // Tự động nhảy cảnh khi mở link có ?media-name=...
-            player.bindOnObject('rootPlayer', 'start', function(e){
-                var queryDict = {}; location.search.substr(1).split("&").forEach(function(item) {var k = item.split("=")[0], v = decodeURIComponent(item.split("=")[1]);queryDict[k] = v});
-                if("media-name" in queryDict){
-                    setMediaByName(queryDict["media-name"]);
-                }
-            }, player, false);
         }
 
         function getRootPlayer() { return window.tdvplayer !== undefined ? window.tdvplayer.getById('rootPlayer') : undefined; }
@@ -69,32 +61,4 @@
     </style>
 </head>
 <body onload="onLoad()">
-    <div id="preloadContainer">Đang tải Tour...</div>
-    <div id="viewer"></div>
-
-    <script type="text/javascript">
-        (function() {
-            var lastUpdate = "";
-            setInterval(function() {
-                try {
-                    if (window.tdvplayer) {
-                        var root = window.tdvplayer.getById('rootPlayer');
-                        if (root && root.get('mainMedia')) {
-                            var media = root.get('mainMedia').get('media');
-                            // Ưu tiên lấy Label (tên riêng Toàn đặt) hoặc Name
-                            var currentName = media.get('label') || media.get('name');
-                            
-                            if (currentName && currentName !== lastUpdate) {
-                                lastUpdate = currentName;
-                                var newUrl = window.location.pathname + '?media-name=' + encodeURIComponent(currentName);
-                                window.history.replaceState(null, '', newUrl);
-                                console.log("URL đã cập nhật: " + currentName);
-                            }
-                        }
-                    }
-                } catch (e) {}
-            }, 1000);
-        })();
-    </script>
-</body>
-</html>
+    <div id="preloadContainer">Loading...
