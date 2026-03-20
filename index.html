@@ -1,65 +1,47 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Virtual Tour</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=0.5, width=device-width, viewport-fit=cover" />
+<script>
+var player;
+var currentIndex = -1;
 
-    <script src="lib/tdvplayer.js"></script>
+function loadTour() {
+    if (player) return;
 
-    <script>
-        var player;
+    var settings = new TDV.PlayerSettings();
+    settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
+    settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js');
 
-        function loadTour() {
-            if (player) return;
+    player = TDV.PlayerAPI.create(settings);
 
-            var settings = new TDV.PlayerSettings();
-            settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
-            settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js');
+    // 👉 Khi start → set ảnh theo URL
+    player.bindOnObject('rootPlayer', 'start', function () {
+        var params = new URLSearchParams(window.location.search);
 
-            player = TDV.PlayerAPI.create(settings);
-
-            // ✅ FIX CHÍNH: cập nhật URL khi đổi ảnh
-            player.bindOnObject('rootPlayer', 'changeMainMedia', function(e){
-                var index = e.index + 1;
-                var newUrl = window.location.pathname + "?media-index=" + index;
-                window.history.replaceState(null, null, newUrl);
-            }, player);
-
-            // ✅ Load ảnh theo URL
-            player.bindOnObject('rootPlayer', 'start', function () {
-                var params = new URLSearchParams(window.location.search);
-
-                if (params.has("media-index")) {
-                    var index = parseInt(params.get("media-index")) - 1;
-                    player.getById('rootPlayer').setMainMediaByIndex(index);
-                } else {
-                    player.getById('rootPlayer').setMainMediaByIndex(0);
-                }
-            }, player);
+        if (params.has("media-index")) {
+            var index = parseInt(params.get("media-index")) - 1;
+            player.getById('rootPlayer').setMainMediaByIndex(index);
+        } else {
+            player.getById('rootPlayer').setMainMediaByIndex(0);
         }
+    }, player);
 
-        function onLoad() {
-            loadTour();
+    // 🔥 FIX CHÍNH: theo dõi ảnh đang hiển thị
+    setInterval(function(){
+        var root = player.getById('rootPlayer');
+        if (!root) return;
+
+        var index = root.get('mainMediaIndex');
+
+        if (index !== currentIndex && index !== undefined) {
+            currentIndex = index;
+
+            var newUrl = window.location.pathname + "?media-index=" + (index + 1);
+            window.history.replaceState(null, null, newUrl);
+
+            console.log("Đổi URL:", newUrl);
         }
-    </script>
+    }, 300); // check mỗi 300ms
+}
 
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-        }
-
-        #viewer {
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-    </style>
-</head>
-
-<body onload="onLoad()">
-    <div id="viewer"></div>
-</body>
-</html>
+function onLoad() {
+    loadTour();
+}
+</script>
