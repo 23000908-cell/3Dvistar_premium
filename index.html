@@ -14,7 +14,6 @@
 
         function loadTour() {
             if(player) return;
-
             var beginFunc = function(event){
                 if(event.name == 'begin') {
                     var camera = event.data.source.get('camera');
@@ -26,23 +25,19 @@
                 disposePreloader();
                 onVirtualTourLoaded();
             };
-
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1773937233406');
             settings.set(TDV.PlayerSettings.WEBVR_POLYFILL_URL, 'lib/WebVRPolyfill.js?v=1773937233406');
             settings.set(TDV.PlayerSettings.HLS_URL, 'lib/Hls.js?v=1773937233406');
             settings.set(TDV.PlayerSettings.QUERY_STRING_PARAMETERS, 'v=1773937233406');
-            
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
             player.bind('preloadMediaShow', beginFunc, player, true);
             player.bind('stateChange', beginFunc, player, true);
         }
-
         function getRootPlayer() { return window.tdvplayer !== undefined ? window.tdvplayer.getById('rootPlayer') : undefined; }
         function setMediaByIndex(index) { var rootPlayer = getRootPlayer(); if(rootPlayer) return rootPlayer.setMainMediaByIndex(index); }
         function setMediaByName(name) { var rootPlayer = getRootPlayer(); if(rootPlayer) return rootPlayer.setMainMediaByName(name); }
-
         function disposePreloader() {
             var preloadContainer = document.getElementById('preloadContainer');
             if(preloadContainer) {
@@ -50,7 +45,6 @@
                 setTimeout(function(){ preloadContainer.style.visibility = 'hidden'; preloadContainer.style.display = 'none'; }, 500);
             }
         }
-
         function onVirtualTourLoaded() {}
         function onLoad() { loadTour(); }
     </script>
@@ -61,4 +55,23 @@
     </style>
 </head>
 <body onload="onLoad()">
-    <div id="preloadContainer">Loading...
+    <div id="preloadContainer">Loading...</div>
+    <div id="viewer"></div>
+
+    <script type="text/javascript">
+        setInterval(function() {
+            try {
+                if (window.tdvplayer) {
+                    var root = window.tdvplayer.getById('rootPlayer');
+                    if (root && root.get('mainMedia')) {
+                        var currentName = root.get('mainMedia').get('media').get('label') || root.get('mainMedia').get('media').get('name');
+                        if (currentName && !window.location.search.includes(currentName)) {
+                            window.history.replaceState(null, '', '?media-name=' + encodeURIComponent(currentName));
+                        }
+                    }
+                }
+            } catch (e) {}
+        }, 1200);
+    </script>
+</body>
+</html>
