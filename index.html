@@ -3,7 +3,7 @@
 <head>
     <title>Virtual Tour</title>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=0.5, width=device-width" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=0.5, width=device-width, viewport-fit=cover" />
 
     <script src="lib/tdvplayer.js"></script>
 
@@ -18,31 +18,36 @@
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js');
+            settings.set(TDV.PlayerSettings.WEBVR_POLYFILL_URL, 'lib/WebVRPolyfill.js');
+            settings.set(TDV.PlayerSettings.HLS_URL, 'lib/Hls.js');
 
             player = TDV.PlayerAPI.create(settings);
 
-            // ✅ Load ảnh theo URL
+            // ✅ Load ảnh từ URL khi mở
             player.bindOnObject('rootPlayer', 'start', function () {
                 var params = new URLSearchParams(window.location.search);
 
                 if (params.has("media-index")) {
                     var index = parseInt(params.get("media-index")) - 1;
-                    player.getById('rootPlayer').setMainMediaByIndex(index);
+                    var root = player.getById('rootPlayer');
+                    if (root) root.setMainMediaByIndex(index);
                 } else {
-                    player.getById('rootPlayer').setMainMediaByIndex(0);
+                    var root = player.getById('rootPlayer');
+                    if (root) root.setMainMediaByIndex(0);
                 }
             }, player);
 
-            // ✅ SYNC URL (cách chắc chắn chạy)
+            // ✅ SYNC URL (CHUẨN NHẤT)
             setInterval(function(){
                 if (!player) return;
 
-                var root = player.getById('rootPlayer');
-                if (!root) return;
+                var playLists = player.getByClassName('PlayList');
+                if (!playLists || playLists.length === 0) return;
 
-                var index = root.get('mainMediaIndex');
+                var playList = playLists[0];
+                var index = playList.get('selectedIndex');
 
-                if (index !== undefined && index !== currentIndex) {
+                if (index !== -1 && index !== currentIndex) {
                     currentIndex = index;
 
                     var newUrl = window.location.pathname + "?media-index=" + (index + 1);
@@ -68,7 +73,7 @@
         #viewer {
             width: 100%;
             height: 100%;
-            background: black;
+            background: #000;
         }
     </style>
 </head>
