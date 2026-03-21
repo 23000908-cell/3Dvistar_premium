@@ -8,75 +8,49 @@
     <script src="lib/tdvplayer.js?v=1773937233406"></script>
     <script type="text/javascript">
         var player;
-        var isInitialized = false;
-
         function loadTour() {
             if(player) return;
-            var beginFunc = function(event){
-                if(event.name == 'begin') isInitialized = true;
-                disposePreloader();
-            };
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1773937233406');
-            settings.set(TDV.PlayerSettings.WEBVR_POLYFILL_URL, 'lib/WebVRPolyfill.js?v=1773937233406');
-            settings.set(TDV.PlayerSettings.HLS_URL, 'lib/Hls.js?v=1773937233406');
             settings.set(TDV.PlayerSettings.QUERY_STRING_PARAMETERS, 'v=1773937233406');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
-            player.bind('preloadMediaShow', beginFunc, player, true);
+            
+            // Tự động tắt màn hình chờ khi tour sẵn sàng
+            player.bind('preloadMediaShow', function(){
+                var p = document.getElementById('preloadContainer');
+                if(p) p.style.display = 'none';
+            }, player, true);
         }
-
-        function disposePreloader() {
-            var p = document.getElementById('preloadContainer');
-            if(p) { p.style.opacity = 0; setTimeout(function(){ p.style.display = 'none'; }, 500); }
-        }
-
-        function onLoad() { loadTour(); }
     </script>
-    <style type="text/css">
+    <style>
         html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
         #viewer { position:absolute; width: 100%; height: 100%; top: 0; z-index:1; }
-        #preloadContainer { z-index:2; position:relative; width:100%; height:100%; background-color: #fff; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        #preloadContainer { z-index:2; position:relative; width:100%; height:100%; background-color: #fff; display: flex; align-items: center; justify-content: center; font-family: Arial; }
     </style>
 </head>
-<body onload="onLoad()">
-    <div id="preloadContainer">Loading Threads of Heritage...</div>
+<body onload="loadTour()">
+    <div id="preloadContainer">Đang tải di sản Pà Cò...</div>
     <div id="viewer"></div>
 
     <script type="text/javascript">
-        (function() {
-            var lastMedia = "";
-            setInterval(function() {
-                try {
-                    // Cách tiếp cận mới: Quét trực tiếp vào mảng quản lý Media của 3DVista
-                    var p = window.tdvplayer;
-                    if (p) {
-                        var currentMedia = null;
-                        
-                        // Thử 3 cách lấy dữ liệu khác nhau (phòng trường hợp Premium đổi tên hàm)
-                        if (p.getById('rootPlayer')) {
-                            currentMedia = p.getById('rootPlayer').get('mainMedia').get('media');
-                        } else if (p.getByClassName('Media')[0]) {
-                            currentMedia = p.getByClassName('Media')[0];
-                        }
-
-                        if (currentMedia) {
-                            var name = currentMedia.get('label') || currentMedia.get('name');
-                            
-                            if (name && name !== lastMedia) {
-                                lastMedia = name;
-                                var cleanName = encodeURIComponent(name);
-                                var newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?media-name=' + cleanName;
-                                
-                                // Ép trình duyệt cập nhật URL mà không giật trang
-                                window.history.replaceState({path: newUrl}, '', newUrl);
-                                console.log("Current Scene: " + name);
+        setInterval(function() {
+            try {
+                if (window.tdvplayer) {
+                    var root = window.tdvplayer.getById('rootPlayer');
+                    if (root && root.get('mainMedia')) {
+                        var media = root.get('mainMedia').get('media');
+                        var name = media.get('label') || media.get('name');
+                        if (name) {
+                            var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?media-name=' + encodeURIComponent(name);
+                            if (!window.location.search.includes(encodeURIComponent(name))) {
+                                window.history.replaceState(null, '', newUrl);
                             }
                         }
                     }
-                } catch (e) { /* Chờ hệ thống khởi tạo xong */ }
-            }, 1500);
-        })();
+                }
+            } catch (e) {}
+        }, 2000);
     </script>
 </body>
 </html>
