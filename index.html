@@ -81,6 +81,21 @@
                 player.getById('rootPlayer').bind('tourEnded', function(){
                     onVirtualTourEnded();
                 }, player, true);
+                
+                // --- ĐOẠN CODE NHẢY URL ĐƯỢC NHÚNG TRỰC TIẾP VÀO SỰ KIỆN START ---
+                player.bindOnObjectsOf('PanoramaPlayListItem', 'begin', function(event) {
+                    try {
+                        var media = event.source.get('media');
+                        var currentName = media.get('label') || media.get('name');
+                        if (currentName) {
+                            var url = new URL(window.location.href);
+                            url.searchParams.set('media-name', currentName);
+                            window.history.replaceState(null, '', url.toString());
+                        }
+                    } catch(e) {}
+                }, player);
+                // ----------------------------------------------------------------
+                
             }, player, false);
 
             /* Listen messages */
@@ -326,32 +341,5 @@
 <body onload="onLoad()">
     <div id="preloadContainer" style="background-color:rgba(255,255,255,1)"><div style="z-index: 4; position: absolute; left: 0%; top: 50%; width: 100.00%; height: 10.00%"><div style="text-align:left; color:#000; "><DIV STYLE="text-align:center;"><SPAN STYLE="letter-spacing:0vmin;color:#777777;font-size:1.39vmin;font-family:Arial, Helvetica, sans-serif;">Loading virtual tour. Please wait...</SPAN></DIV><p STYLE="margin:0; line-height:1.02vmin;"><BR STYLE="letter-spacing:0vmin;color:#000000;font-size:1.02vmin;font-family:Arial, Helvetica, sans-serif;"/></p></div></div></div>
     <div id="viewer"></div>
-
-    <script type="text/javascript">
-        (function() {
-            var lastMediaName = "";
-            setInterval(function() {
-                try {
-                    if (window.tdvplayer) {
-                        var root = window.tdvplayer.getById('rootPlayer');
-                        if (root) {
-                            var currentName = "";
-                            var mainMedia = root.get('mainMedia');
-                            if (mainMedia && mainMedia.get('media')) {
-                                currentName = mainMedia.get('media').get('label') || mainMedia.get('media').get('name');
-                            }
-                            
-                            if (currentName && currentName !== lastMediaName) {
-                                lastMediaName = currentName;
-                                var url = new URL(window.location.href);
-                                url.searchParams.set('media-name', currentName);
-                                window.history.replaceState(null, '', url.toString());
-                            }
-                        }
-                    }
-                } catch (e) { /* Tránh xung đột code gốc */ }
-            }, 1500);
-        })();
-    </script>
 </body>
 </html>
