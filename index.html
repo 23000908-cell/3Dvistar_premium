@@ -23,7 +23,6 @@
                 isInitialized = true;
                 player.unbind('preloadMediaShow', beginFunc, player, true);
                 disposePreloader();
-                onVirtualTourLoaded();
             };
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
@@ -43,7 +42,6 @@
             var p = document.getElementById('preloadContainer');
             if(p) { p.style.opacity = 0; setTimeout(function(){ p.style.display = 'none'; }, 500); }
         }
-        function onVirtualTourLoaded() {}
         function onLoad() { loadTour(); }
     </script>
     <style type="text/css">
@@ -59,31 +57,26 @@
     <script type="text/javascript">
         (function() {
             var lastUpdate = "";
-            function updateURL() {
+            setInterval(function() {
                 try {
-                    // Truy cập sâu vào lõi của 3DVista
-                    if (window.tdvplayer && typeof window.tdvplayer.getById === 'function') {
+                    // Kiểm tra biến hệ thống của 3DVista
+                    if (window.tdvplayer && window.tdvplayer.getById('rootPlayer')) {
                         var root = window.tdvplayer.getById('rootPlayer');
-                        if (root) {
-                            var mainMedia = root.get('mainMedia');
-                            if (mainMedia) {
-                                var mediaObj = mainMedia.get('media');
-                                var currentName = mediaObj.get('label') || mediaObj.get('name');
-                                
-                                if (currentName && currentName !== lastUpdate) {
-                                    lastUpdate = currentName;
-                                    // Tạo URL mới sạch sẽ
-                                    var newUrl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?media-name=' + encodeURIComponent(currentName);
-                                    window.history.replaceState({path: newUrl}, '', newUrl);
-                                    console.log("URL Updated to: " + currentName);
-                                }
+                        var mainMedia = root.get('mainMedia');
+                        if (mainMedia) {
+                            var mediaObj = mainMedia.get('media');
+                            var currentName = mediaObj.get('label') || mediaObj.get('name');
+                            
+                            if (currentName && currentName !== lastUpdate) {
+                                lastUpdate = currentName;
+                                // Đổi URL mà không load lại trang
+                                var newUrl = window.location.pathname + '?media-name=' + encodeURIComponent(currentName);
+                                window.history.replaceState(null, '', newUrl);
                             }
                         }
                     }
-                } catch (e) { /* Chờ tour load xong */ }
-            }
-            // Kiểm tra liên tục mỗi giây
-            setInterval(updateURL, 1000);
+                } catch (e) { /* Chờ tour khởi tạo */ }
+            }, 1000);
         })();
     </script>
 </body>
