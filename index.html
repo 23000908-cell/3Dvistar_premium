@@ -16,35 +16,39 @@
 				settings.set(TDV.PlayerSettings.QUERY_STRING_PARAMETERS, 'v=1773937233406');
 				window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 				
-				// ĐOẠN QUAN TRỌNG: Chỉ chạy khi tour đã hiện ảnh
+				// Khi tour load xong thì ẩn màn hình chờ
 				player.bind('preloadMediaShow', function() {
 					var p = document.getElementById('preloadContainer');
-					if(p) p.style.display = 'none';
-					
-					// Bắt đầu theo dõi URL sau khi ảnh đã hiện
-					setInterval(function() {
-						try {
-							var root = player.getById('rootPlayer');
-							if (root && root.get('mainMedia')) {
-								var name = root.get('mainMedia').get('media').get('label') || root.get('mainMedia').get('media').get('name');
-								if (name && !window.location.search.includes(encodeURIComponent(name))) {
-									var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?media-name=' + encodeURIComponent(name);
-									window.history.replaceState(null, '', newUrl);
-								}
-							}
-						} catch (e) {}
-					}, 2000);
+					if(p) { p.style.opacity = 0; setTimeout(function(){ p.style.display = 'none'; }, 500); }
 				}, player, true);
 			}
 		</script>
 		<style type="text/css">
 			html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
 			#viewer { position:absolute; width: 100%; height: 100%; top: 0; z-index:1; }
-			#preloadContainer { z-index:2; position:relative; width:100%; height:100%; background-color: #fff; display: flex; align-items: center; justify-content: center; font-family: Arial; }
+			#preloadContainer { z-index:2; position:relative; width:100%; height:100%; background-color: #fff; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s; font-family: Arial; }
 		</style>
 	</head>
 	<body onload="loadTour()">
 		<div id="preloadContainer">Loading Threads of Heritage - Pà Cò...</div>
 		<div id="viewer"></div>
+
+		<script type="text/javascript">
+			setTimeout(function() {
+				setInterval(function() {
+					try {
+						if (window.tdvplayer) {
+							var root = window.tdvplayer.getById('rootPlayer');
+							if (root && root.get('mainMedia')) {
+								var name = root.get('mainMedia').get('media').get('label') || root.get('mainMedia').get('media').get('name');
+								if (name && !window.location.search.includes(encodeURIComponent(name))) {
+									window.history.replaceState(null, '', window.location.pathname + '?media-name=' + encodeURIComponent(name));
+								}
+							}
+						}
+					} catch (e) {}
+				}, 2000);
+			}, 5000);
+		</script>
 	</body>
 </html>
