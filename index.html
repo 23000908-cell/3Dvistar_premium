@@ -334,19 +334,23 @@
                 try {
                     if (window.tdvplayer) {
                         var root = window.tdvplayer.getById('rootPlayer');
-                        if (root && root.get('mainMedia')) {
-                            var media = root.get('mainMedia').get('media');
-                            var currentName = media.get('label') || media.get('name');
+                        if (root) {
+                            var currentName = "";
+                            var mainMedia = root.get('mainMedia');
+                            if (mainMedia && mainMedia.get('media')) {
+                                currentName = mainMedia.get('media').get('label') || mainMedia.get('media').get('name');
+                            }
+                            
                             if (currentName && currentName !== lastMediaName) {
                                 lastMediaName = currentName;
-                                var cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                                var newUrl = cleanUrl + '?media-name=' + encodeURIComponent(currentName);
-                                window.history.replaceState(null, '', newUrl);
+                                var url = new URL(window.location.href);
+                                url.searchParams.set('media-name', currentName);
+                                window.history.replaceState(null, '', url.toString());
                             }
                         }
                     }
-                } catch (e) {}
-            }, 2000);
+                } catch (e) { /* Tránh xung đột code gốc */ }
+            }, 1500);
         })();
     </script>
 </body>
