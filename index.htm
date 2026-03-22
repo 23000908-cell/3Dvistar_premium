@@ -14,34 +14,27 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            player.bindOnObject('rootPlayer', 'start', function(e){
-                var lastMediaName = "";
-                
-                var checkSystem = setInterval(function() {
-                    try {
-                        var rp = player.getById('rootPlayer');
-                        if (!rp) return; // Đợi đến khi rootPlayer thực sự tồn tại
-
-                        var panoPlayer = rp.get('MainviewerPanoramaPlayer');
-                        if (!panoPlayer) return; // Đợi Panorama Player sẵn sàng
-
-                        var currentMedia = panoPlayer.get('currentMedia');
-                        if (!currentMedia) return;
-
-                        var media = currentMedia.get('media');
-                        var name = media.get('name') || media.get('label');
-
-                        if (name && name !== lastMediaName) {
-                            lastMediaName = name;
-                            var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?scene=' + encodeURIComponent(name);
-                            window.history.replaceState(null, '', newUrl);
-                            document.getElementById('debug').style.display = "none"; // Ẩn thông báo khi đã chạy ngon
+            // Phương pháp mới: Quét trực tiếp toàn bộ bộ nhớ Player
+            setInterval(function() {
+                try {
+                    var allObjects = player.getObjects();
+                    for (var id in allObjects) {
+                        if (id.indexOf('PanoramaPlayer') !== -1) {
+                            var pano = allObjects[id];
+                            var name = pano.get('currentMedia').get('media').get('name');
+                            if (name && name !== window.lastSceneName) {
+                                window.lastSceneName = name;
+                                var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?scene=' + encodeURIComponent(name);
+                                window.history.replaceState(null, '', newUrl);
+                                document.getElementById('debug').style.display = 'none';
+                            }
+                            break;
                         }
-                    } catch (err) {
-                        // Giữ im lặng để hệ thống tự load ngầm
                     }
-                }, 1500); // Tăng thời gian giãn cách để tránh quá tải trình duyệt
-            }, player, false);
+                } catch (e) {
+                    // Đang tải dữ liệu...
+                }
+            }, 2000);
         }
     </script>
     <style type="text/css">
@@ -50,7 +43,7 @@
     </style>
 </head>
 <body onload="loadTour()">
-    <div id="debug">🚀 Đang kết nối dữ liệu Pà Cò...</div>
+    <div id="debug">🚀 Đang đồng bộ hóa không gian Pà Cò...</div>
     <div id="viewer"></div>
 </body>
 </html>
