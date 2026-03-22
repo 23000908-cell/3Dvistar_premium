@@ -20,19 +20,21 @@
                 setInterval(function() {
                     try {
                         var rp = player.getById('rootPlayer');
-                        // Thử 4 cách lấy tên cảnh khác nhau
-                        var currentMedia = rp.get('currentMedia') || rp.get('mainMedia');
-                        var media = currentMedia.get('media') || currentMedia;
-                        var name = media.get('label') || media.get('name') || media.id || "Đang tải...";
+                        // Cách lấy tên cảnh mới dựa trên "nội tạng" vừa soi được
+                        var panoPlayer = rp.get('MainviewerPanoramaPlayer');
+                        var currentMedia = panoPlayer.get('currentMedia');
+                        var media = currentMedia.get('media');
+                        var name = media.get('name') || media.get('label') || "Pà Cò";
 
-                        if (name && name !== lastMediaName && name !== "Đang tải...") {
+                        if (name && name !== lastMediaName) {
                             lastMediaName = name;
                             var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?scene=' + encodeURIComponent(name);
                             window.history.replaceState(null, '', newUrl);
-                            document.getElementById('debug').innerHTML = "✅ Đã khớp cảnh: " + name;
+                            document.getElementById('debug').innerHTML = "✅ Đang ở cảnh: " + name;
                         }
                     } catch (err) {
-                        document.getElementById('debug').innerHTML = "⏳ Đang tìm dữ liệu cảnh...";
+                        // Nếu là video hoặc loại khác, thử phương án dự phòng
+                        document.getElementById('debug').innerHTML = "⏳ Hệ thống đang đồng bộ...";
                     }
                 }, 1000);
             }, player, false);
@@ -40,11 +42,11 @@
     </script>
     <style type="text/css">
         html, body, #viewer { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #000; overflow: hidden; }
-        #debug { position: fixed; top: 10px; left: 10px; color: #00ff00; background: rgba(0,0,0,0.85); padding: 10px; z-index: 9999; font-family: sans-serif; font-size: 14px; border: 1px solid #00ff00; border-radius: 5px; pointer-events: none; }
+        #debug { position: fixed; top: 10px; left: 10px; color: #00ff00; background: rgba(0,0,0,0.8); padding: 10px; z-index: 9999; font-family: sans-serif; font-size: 12px; border: 1px solid #00ff00; border-radius: 4px; pointer-events: none; }
     </style>
 </head>
 <body onload="loadTour()">
-    <div id="debug">🚀 Đang đánh thức Player...</div>
+    <div id="debug">🚀 Khởi động bộ quét 3DVista...</div>
     <div id="viewer"></div>
 </body>
 </html>
