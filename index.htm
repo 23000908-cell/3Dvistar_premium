@@ -3,6 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -11,29 +12,31 @@
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
-            // Thêm tùy chọn để tránh lỗi Canvas readback
-            settings.set(TDV.PlayerSettings.WEBGL_OPTIONS, {preserveDrawingBuffer: true});
+            // Ép hệ thống dùng WebGL chuẩn để tránh lỗi tính toán NaN
+            settings.set(TDV.PlayerSettings.WEBGL_OPTIONS, {preserveDrawingBuffer: true, alpha: false});
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Chỉ quét URL khi hệ thống đã ổn định hoàn toàn
-            setTimeout(function() {
+            // Chỉ chạy quét URL khi thực sự chuyển cảnh thành công
+            player.bindOnObject('rootPlayer', 'start', function() {
                 setInterval(function() {
                     try {
                         var rp = player.getById('rootPlayer');
                         var pano = rp.get('MainviewerPanoramaPlayer');
-                        var name = pano.get('currentMedia').get('media').get('name');
+                        var media = pano.get('currentMedia').get('media');
+                        var name = media.get('name');
                         if (name && name !== window.lastScene) {
                             window.lastScene = name;
                             var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(name);
                             window.history.replaceState(null, '', newUrl);
                         }
                     } catch (e) {}
-                }, 3000);
-            }, 5000);
+                }, 2000);
+            });
         }
     </script>
     <style type="text/css">
-        html, body, #viewer { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #000; overflow: hidden; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+        #viewer { width: 100%; height: 100%; position: absolute; }
     </style>
 </head>
 <body onload="loadTour()">
