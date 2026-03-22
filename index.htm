@@ -3,40 +3,38 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
         function loadTour() {
-            if(player) return;
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
-            // Ép hệ thống dùng WebGL chuẩn để tránh lỗi tính toán NaN
-            settings.set(TDV.PlayerSettings.WEBGL_OPTIONS, {preserveDrawingBuffer: true, alpha: false});
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Chỉ chạy quét URL khi thực sự chuyển cảnh thành công
-            player.bindOnObject('rootPlayer', 'start', function() {
-                setInterval(function() {
+            // CÁCH CHỐT HẠ: Lấy thẳng dữ liệu từ bộ nhớ đệm của Player
+            setInterval(function() {
+                try {
+                    // Quét trực tiếp vào đối tượng đang hiển thị trên màn hình
+                    var currentScene = player.getById('rootPlayer').getActiveView().get('media').get('name');
+                    
+                    if (currentScene && currentScene !== window.lastScene) {
+                        window.lastScene = currentScene;
+                        // Tạo link dạng: .../index.htm#scene=TenCanh
+                        window.location.hash = "scene=" + currentScene;
+                    }
+                } catch (e) {
+                    // Nếu cách trên lỗi, thử lấy qua Label
                     try {
-                        var rp = player.getById('rootPlayer');
-                        var pano = rp.get('MainviewerPanoramaPlayer');
-                        var media = pano.get('currentMedia').get('media');
-                        var name = media.get('name');
-                        if (name && name !== window.lastScene) {
-                            window.lastScene = name;
-                            var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(name);
-                            window.history.replaceState(null, '', newUrl);
-                        }
-                    } catch (e) {}
-                }, 2000);
-            });
+                        var label = player.getById('rootPlayer').getActiveView().get('media').get('label');
+                        if (label) window.location.hash = "scene=" + encodeURIComponent(label);
+                    } catch (err) {}
+                }
+            }, 1500);
         }
     </script>
     <style type="text/css">
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
-        #viewer { width: 100%; height: 100%; position: absolute; }
+        html, body, #viewer { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #000; overflow: hidden; }
     </style>
 </head>
 <body onload="loadTour()">
