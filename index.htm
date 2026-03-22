@@ -14,36 +14,39 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Phương pháp mới: Quét trực tiếp toàn bộ bộ nhớ Player
+            // Vòng lặp lấy tên cảnh theo cách đơn giản nhất
             setInterval(function() {
                 try {
-                    var allObjects = player.getObjects();
-                    for (var id in allObjects) {
-                        if (id.indexOf('PanoramaPlayer') !== -1) {
-                            var pano = allObjects[id];
-                            var name = pano.get('currentMedia').get('media').get('name');
-                            if (name && name !== window.lastSceneName) {
-                                window.lastSceneName = name;
-                                var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?scene=' + encodeURIComponent(name);
-                                window.history.replaceState(null, '', newUrl);
-                                document.getElementById('debug').style.display = 'none';
-                            }
-                            break;
-                        }
+                    // Thử lấy qua hàm API chuẩn
+                    var media = player.getCurrentMedia();
+                    var name = media ? (media.name || media.label) : null;
+                    
+                    if (name && name !== window.lastSceneName) {
+                        window.lastSceneName = name;
+                        var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(name);
+                        window.history.replaceState(null, '', newUrl);
+                        document.getElementById('debug').style.display = 'none';
                     }
                 } catch (e) {
-                    // Đang tải dữ liệu...
+                    // Nếu lỗi, thử tìm trong danh sách Objects (phương án dự phòng)
+                    var objs = player.getObjects();
+                    for(var i in objs) {
+                        if(objs[i] && objs[i].hasOwnProperty('currentMedia')) {
+                            var n = objs[i].get('currentMedia').get('media').get('name');
+                            if(n) { /* Cập nhật URL tại đây */ }
+                        }
+                    }
                 }
             }, 2000);
         }
     </script>
     <style type="text/css">
         html, body, #viewer { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #000; overflow: hidden; }
-        #debug { position: fixed; top: 10px; left: 10px; color: #00ff00; background: rgba(0,0,0,0.8); padding: 10px; z-index: 9999; font-family: sans-serif; font-size: 12px; border: 1px solid #00ff00; border-radius: 4px; pointer-events: none; }
+        #debug { position: fixed; top: 10px; left: 10px; color: #00ff00; background: rgba(0,0,0,0.8); padding: 10px; z-index: 9999; font-family: sans-serif; font-size: 11px; border: 1px solid #00ff00; border-radius: 4px; pointer-events: none; }
     </style>
 </head>
 <body onload="loadTour()">
-    <div id="debug">🚀 Đang đồng bộ hóa không gian Pà Cò...</div>
+    <div id="debug">📡 Đang kết nối không gian Pà Cò...</div>
     <div id="viewer"></div>
 </body>
 </html>
