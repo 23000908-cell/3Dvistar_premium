@@ -14,21 +14,28 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Bắt sự kiện chuyển cảnh từ lõi của 3DVista
-            player.bindOnObject('rootPlayer', 'currentMediaName_changed', function() {
-                try {
-                    var rp = player.getById('rootPlayer');
-                    // Lấy tên cảnh trực tiếp từ thuộc tính currentMediaName
-                    var sceneName = rp.get('currentMediaName');
-                    
-                    if (sceneName) {
-                        var newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?scene=' + encodeURIComponent(sceneName);
-                        window.history.replaceState(null, '', newUrl);
+            // Đợi 2 giây để tour load xong danh sách ảnh
+            setTimeout(function() {
+                setInterval(function() {
+                    try {
+                        var rp = player.getById('rootPlayer');
+                        // Truy cập vào mainPlayList mà mình thấy trong script.js của bạn
+                        var list = rp.mainPlayList;
+                        var index = list.get('selectedIndex');
+                        var currentMedia = list.get('items')[index].get('media');
+                        var sceneName = currentMedia.get('name');
+
+                        if (sceneName && sceneName !== window.lastScene) {
+                            window.lastScene = sceneName;
+                            // Cập nhật URL ngay lập tức
+                            var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(sceneName);
+                            window.history.replaceState(null, '', newUrl);
+                        }
+                    } catch (e) {
+                        // Vẫn đang load...
                     }
-                } catch (e) {
-                    console.log("Đang tải cảnh...");
-                }
-            });
+                }, 1500);
+            }, 3000);
         }
     </script>
     <style type="text/css">
