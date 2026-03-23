@@ -3,34 +3,43 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
         function loadTour() {
+            if(player) return;
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // CÁCH CHỐT HẠ: Lấy thẳng dữ liệu từ bộ nhớ đệm của Player
-            setInterval(function() {
-                try {
-                    // Quét trực tiếp vào đối tượng đang hiển thị trên màn hình
-                    var currentScene = player.getById('rootPlayer').getActiveView().get('media').get('name');
-                    
-                    if (currentScene && currentScene !== window.lastScene) {
-                        window.lastScene = currentScene;
-                        // Tạo link dạng: .../index.htm#scene=TenCanh
-                        window.location.hash = "scene=" + currentScene;
-                    }
-                } catch (e) {
-                    // Nếu cách trên lỗi, thử lấy qua Label
+            // Đợi player khởi tạo xong hoàn toàn
+            player.bindOnObject('rootPlayer', 'start', function() {
+                var lastIndex = -1;
+                setInterval(function() {
                     try {
-                        var label = player.getById('rootPlayer').getActiveView().get('media').get('label');
-                        if (label) window.location.hash = "scene=" + encodeURIComponent(label);
-                    } catch (err) {}
-                }
-            }, 1500);
+                        // Dựa trên file script.js: dùng mainPlayList để lấy vị trí cảnh
+                        var root = player.getById('rootPlayer');
+                        var playlist = root.get('mainPlayList');
+                        var currentIndex = playlist.get('selectedIndex');
+                        
+                        if (currentIndex !== lastIndex) {
+                            lastIndex = currentIndex;
+                            // Lấy tên cảnh từ danh sách item trong playlist
+                            var currentMedia = playlist.get('items')[currentIndex];
+                            var sceneName = currentMedia.get('media').get('name');
+
+                            if (sceneName) {
+                                var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(sceneName);
+                                window.history.replaceState(null, '', newUrl);
+                            }
+                        }
+                    } catch (e) {
+                        // Im lặng nếu chưa load xong
+                    }
+                }, 1000);
+            });
         }
     </script>
     <style type="text/css">
