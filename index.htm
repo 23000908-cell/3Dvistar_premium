@@ -3,6 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -13,36 +14,51 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Vòng lặp quét liên tục với độ trễ thấp
-            setInterval(function() {
-                try {
-                    // Chọc đúng vào cái "số 5" mà Toàn đã tìm ra
-                    var rp = player.getById('rootPlayer');
-                    if (rp && rp.mainPlayList) {
-                        var list = rp.mainPlayList;
-                        var idx = list.get('selectedIndex');
-                        var items = list.get('items');
-                        
-                        if (items && items[idx]) {
-                            var media = items[idx].get('media');
-                            // Thử lấy Name, nếu không có thì lấy Label
-                            var sceneName = media.get('name') || media.get('label');
-
-                            if (sceneName && sceneName !== window.lastScene) {
-                                window.lastScene = sceneName;
-                                // Ép URL phải thay đổi ngay lập tức
-                                window.location.hash = "scene=" + encodeURIComponent(sceneName);
-                            }
+            // XỬ LÝ VẤN ĐỀ 2 & 3: TỰ ĐỘNG MỞ ẢNH TỪ LINK HOẶC ẢNH ĐẦU TIÊN
+            player.bindOnObject('rootPlayer', 'start', function() {
+                var rp = player.getById('rootPlayer');
+                var list = rp.mainPlayList;
+                
+                // Kiểm tra xem URL có sẵn #scene=... không
+                var hash = window.location.hash;
+                if (hash.indexOf('#scene=') !== -1) {
+                    var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
+                    var items = list.get('items');
+                    for (var i = 0; i < items.length; i++) {
+                        var media = items[i].get('media');
+                        if (media.get('name') === targetScene || media.get('label') === targetScene) {
+                            list.set('selectedIndex', i); // Nhảy thẳng đến cảnh trong link
+                            break;
                         }
                     }
-                } catch (e) {
-                    // Bỏ qua lỗi nếu tour chưa sẵn sàng
                 }
-            }, 1000); // Quét mỗi giây 1 lần
+
+                // VẤN ĐỀ 1: CẬP NHẬT URL KHI DI CHUYỂN
+                setInterval(function() {
+                    try {
+                        var idx = list.get('selectedIndex');
+                        var currentMedia = list.get('items')[idx].get('media');
+                        var sceneName = currentMedia.get('name') || currentMedia.get('label');
+                        if (sceneName && sceneName !== window.lastScene) {
+                            window.lastScene = sceneName;
+                            window.location.hash = "scene=" + encodeURIComponent(sceneName);
+                        }
+                    } catch (e) {}
+                }, 1000);
+            });
         }
     </script>
     <style type="text/css">
-        html, body, #viewer { width: 100%; height: 100%; margin: 0; padding: 0; background-color: #000; overflow: hidden; }
+        /* FIX VẤN ĐỀ 1: TRÀN CHỮ */
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
+        #viewer { 
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            top: 0; 
+            left: 0;
+            z-index: 1;
+        }
     </style>
 </head>
 <body onload="loadTour()">
