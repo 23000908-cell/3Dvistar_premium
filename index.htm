@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Threads of Heritage - Pà Cò</title>
+    <title>Threads of Heritage: Digital Art</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <script src="lib/tdvplayer.js?v=1774121477535"></script>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, width=device-width, viewport-fit=cover" />
+    
+    <script src="lib/tdvplayer.js?v=1774339490840"></script>
     <script type="text/javascript">
         var player;
         function loadTour() {
             if(player) return;
+
             var settings = new TDV.PlayerSettings();
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
-            settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
+            settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774339490840');
+            settings.set(TDV.PlayerSettings.QUERY_STRING_PARAMETERS, 'v=1774339490840');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
+            // LOGIC NHẢY LINK VÀ ĐỌC LINK (ĐÃ TỐI ƯU)
             player.bindOnObject('rootPlayer', 'start', function() {
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
+                // 1. Đọc link khi vừa mở trang
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -31,6 +36,7 @@
                     }
                 }
 
+                // 2. Cập nhật link khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -44,33 +50,36 @@
                 }, 1000);
             });
         }
+
+        // Đảm bảo tour load mượt trên cả mobile/desktop
+        function onLoad() {
+            loadTour();
+        }
     </script>
     <style type="text/css">
-        /* FIX LỖI MẤT CHỮ TRIỆT ĐỂ */
         html, body { 
-            width: 100%; 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background-color: #000; 
+            width: 100%; height: 100%; margin: 0; padding: 0; 
+            overflow: hidden; background-color: #000; 
         }
         #viewer { 
             position: absolute; 
-            /* Tạo khoảng trống 40px ở trên và dưới để chữ không bao giờ bị chạm mép */
-            top: 40px; 
-            bottom: 40px;
-            left: 20px;
-            right: 20px;
+            /* SỬA LỖI MẤT CHỮ: Dùng vùng an toàn thay vì pixel cứng */
+            top: env(safe-area-inset-top);
+            bottom: env(safe-area-inset-bottom);
+            left: env(safe-area-inset-left);
+            right: env(safe-area-inset-right);
+            width: 100%; 
+            height: 100%;
             z-index: 1;
         }
-        /* Ép Canvas bên trong không được tràn ra ngoài vùng chứa */
+        /* Ép nội dung tour luôn nằm trong khung hình */
         canvas {
             object-fit: contain !important;
         }
     </style>
+    <link rel="stylesheet" href="fonts.css?v=1774339490840">
 </head>
-<body onload="loadTour()">
+<body onload="onLoad()">
     <div id="viewer"></div>
 </body>
 </html>
