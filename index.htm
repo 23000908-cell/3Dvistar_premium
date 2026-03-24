@@ -3,7 +3,6 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -14,28 +13,20 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // Đợi 2 giây để tour load xong danh sách ảnh
-            setTimeout(function() {
-                setInterval(function() {
-                    try {
-                        var rp = player.getById('rootPlayer');
-                        // Truy cập vào mainPlayList mà mình thấy trong script.js của bạn
-                        var list = rp.mainPlayList;
-                        var index = list.get('selectedIndex');
-                        var currentMedia = list.get('items')[index].get('media');
-                        var sceneName = currentMedia.get('name');
+            setInterval(function() {
+                try {
+                    // Lấy thẳng từ cái lệnh bạn vừa gõ ra số 5
+                    var list = player.getById('rootPlayer').mainPlayList;
+                    var index = list.get('selectedIndex');
+                    var sceneName = list.get('items')[index].get('media').get('name');
 
-                        if (sceneName && sceneName !== window.lastScene) {
-                            window.lastScene = sceneName;
-                            // Cập nhật URL ngay lập tức
-                            var newUrl = window.location.origin + window.location.pathname + '?scene=' + encodeURIComponent(sceneName);
-                            window.history.replaceState(null, '', newUrl);
-                        }
-                    } catch (e) {
-                        // Vẫn đang load...
+                    if (sceneName && sceneName !== window.lastScene) {
+                        window.lastScene = sceneName;
+                        // Dùng dấu # để URL nhảy ngay lập tức mà không bị lỗi 404
+                        window.location.hash = "scene=" + sceneName;
                     }
-                }, 1500);
-            }, 3000);
+                } catch (e) {}
+            }, 1000);
         }
     </script>
     <style type="text/css">
