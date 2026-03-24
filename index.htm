@@ -3,12 +3,9 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=contain" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
-        // CHẶN CHUỘT PHẢI ĐỂ BẢO VỆ TÀI NGUYÊN (ẢNH/CODE)
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
         var player;
         function loadTour() {
             if(player) return;
@@ -21,7 +18,7 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // 1. Logic nhảy link khi vào trang (Dành cho chia sẻ cảnh cụ thể)
+                // Đọc link khi vào trang
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -35,7 +32,7 @@
                     }
                 }
 
-                // 2. Logic tự động cập nhật URL khi chuyển cảnh
+                // Cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -51,33 +48,23 @@
         }
     </script>
     <style type="text/css">
+        /* FIX LỖI MẤT CHỮ - PHƯƠNG ÁN CUỐI CÙNG */
         html, body { 
-            width: 100%; height: 100%; margin: 0; padding: 0; 
-            overflow: hidden; background-color: #000; 
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            width: 100%; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #000; 
         }
-
         #viewer { 
-            /* Thay đổi vị trí để tạo khoảng trống an toàn */
+            /* Thay vì dùng 100%, mình dùng 92% chiều cao để chừa chỗ cho chữ ở trên/dưới */
+            width: 100%; 
+            height: 92%; 
             position: absolute; 
-            top: 50px; /* Tạo khoảng trống ở trên cho chữ tiêu đề */
-            left: 20px; /* Tạo khoảng trống ở bên trái */
-            right: 20px; /* Tạo khoảng trống ở bên phải */
-            bottom: 0;
-            
-            /* Điều chỉnh chiều cao và chiều rộng để giảm thiểu sự co lại */
-            width: calc(100% - 40px); /* Đảm bảo tour ảo vẫn co giãn trong vùng an toàn */
-            height: calc(100% - 50px);
+            top: 4%; /* Đẩy tour xuống 4% để không bị lẹm chữ ở trên */
+            left: 0;
             z-index: 1;
-        }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain !important; /* Đảm bảo không bao giờ bị cắt mép */
         }
     </style>
 </head>
