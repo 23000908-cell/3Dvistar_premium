@@ -14,12 +14,11 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
-            // XỬ LÝ LINK RIÊNG VÀ TỰ ĐỘNG LOAD
             player.bindOnObject('rootPlayer', 'start', function() {
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // 1. Đọc link khi vào trang để mở đúng ảnh
+                // 1. Đọc link khi vào trang
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -33,7 +32,7 @@
                     }
                 }
 
-                // 2. Cập nhật URL khi người dùng chuyển cảnh
+                // 2. Cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -49,37 +48,32 @@
         }
     </script>
     <style type="text/css">
-        /* TỔNG THỂ KHUNG HÌNH */
         html, body { 
-            width: 100%; 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background-color: #000; 
+            width: 100%; height: 100%; margin: 0; padding: 0; 
+            overflow: hidden; background-color: #000; 
         }
 
-        /* GIAO DIỆN LAPTOP & MÀN HÌNH NGANG */
         #viewer { 
-            width: 100%; 
-            height: 100%; 
-            position: absolute; 
-            top: 0; 
-            left: 0;
-            z-index: 1;
+            width: 100%; height: 100%; 
+            position: absolute; top: 0; left: 0; z-index: 1;
         }
 
-        /* GIAO DIỆN ĐIỆN THOẠI CẦM DỌC (Sửa lỗi chữ to, mất chữ) */
+        /* FIX CHỐT HẠ CHO ĐIỆN THOẠI (DỌC) */
         @media screen and (orientation: portrait) {
-            #viewer {
-                /* Thu nhỏ chiều cao để logo 3DVista tự co lại theo tỷ lệ */
-                height: 80%; 
-                top: 10%; 
-                width: 100%;
+            #viewer canvas { 
+                /* Ép cái hình bên trong không được to quá chiều rộng màn hình */
+                max-width: 100% !important;
+                max-height: 85% !important; 
+                object-fit: contain !important;
+                margin: auto;
+                top: 0; bottom: 0; left: 0; right: 0;
             }
-            body {
-                /* Tạo hiệu ứng nền tối sâu cho vùng trống */
-                background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+            #viewer {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                background: #000;
             }
         }
     </style>
