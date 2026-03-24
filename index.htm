@@ -13,20 +13,32 @@
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
 
+            // Vòng lặp quét liên tục với độ trễ thấp
             setInterval(function() {
                 try {
-                    // Lấy thẳng từ cái lệnh bạn vừa gõ ra số 5
-                    var list = player.getById('rootPlayer').mainPlayList;
-                    var index = list.get('selectedIndex');
-                    var sceneName = list.get('items')[index].get('media').get('name');
+                    // Chọc đúng vào cái "số 5" mà Toàn đã tìm ra
+                    var rp = player.getById('rootPlayer');
+                    if (rp && rp.mainPlayList) {
+                        var list = rp.mainPlayList;
+                        var idx = list.get('selectedIndex');
+                        var items = list.get('items');
+                        
+                        if (items && items[idx]) {
+                            var media = items[idx].get('media');
+                            // Thử lấy Name, nếu không có thì lấy Label
+                            var sceneName = media.get('name') || media.get('label');
 
-                    if (sceneName && sceneName !== window.lastScene) {
-                        window.lastScene = sceneName;
-                        // Dùng dấu # để URL nhảy ngay lập tức mà không bị lỗi 404
-                        window.location.hash = "scene=" + sceneName;
+                            if (sceneName && sceneName !== window.lastScene) {
+                                window.lastScene = sceneName;
+                                // Ép URL phải thay đổi ngay lập tức
+                                window.location.hash = "scene=" + encodeURIComponent(sceneName);
+                            }
+                        }
                     }
-                } catch (e) {}
-            }, 1000);
+                } catch (e) {
+                    // Bỏ qua lỗi nếu tour chưa sẵn sàng
+                }
+            }, 1000); // Quét mỗi giây 1 lần
         }
     </script>
     <style type="text/css">
