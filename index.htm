@@ -3,7 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=contain" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -18,21 +18,7 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // --- FIX CHỮ TRÀN KHUNG (PHẦN RUỘT) ---
-                if(window.innerHeight > window.innerWidth) { 
-                    // Nếu là điện thoại dọc, ép toàn bộ hệ thống render nhỏ lại 30%
-                    // Cách này sẽ khiến chữ bên trong tự động co lại cho vừa khung
-                    setInterval(function() {
-                        var canvas = document.querySelector('canvas');
-                        if(canvas && !canvas.getAttribute('data-scaled')) {
-                            canvas.style.transform = "scale(0.7)"; 
-                            canvas.style.transformOrigin = "top center";
-                            canvas.setAttribute('data-scaled', 'true');
-                        }
-                    }, 500);
-                }
-
-                // XỬ LÝ LINK RIÊNG TỪNG ẢNH
+                // Đọc link khi vào trang
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -46,6 +32,7 @@
                     }
                 }
 
+                // Cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -61,21 +48,23 @@
         }
     </script>
     <style type="text/css">
+        /* FIX LỖI MẤT CHỮ - PHƯƠNG ÁN CUỐI CÙNG */
         html, body { 
-            width: 100%; height: 100%; margin: 0; padding: 0; 
-            overflow: hidden; background-color: #000; 
+            width: 100%; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #000; 
         }
         #viewer { 
-            width: 100%; height: 100%; 
-            position: absolute; top: 0; left: 0; z-index: 1;
-            display: flex; align-items: center; justify-content: center;
-        }
-        /* Ép khung chứa không được phép tràn */
-        @media screen and (orientation: portrait) {
-            #viewer {
-                height: 100vh;
-                width: 100vw;
-            }
+            /* Thay vì dùng 100%, mình dùng 92% chiều cao để chừa chỗ cho chữ ở trên/dưới */
+            width: 100%; 
+            height: 92%; 
+            position: absolute; 
+            top: 4%; /* Đẩy tour xuống 4% để không bị lẹm chữ ở trên */
+            left: 0;
+            z-index: 1;
         }
     </style>
 </head>
