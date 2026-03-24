@@ -3,7 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -18,7 +18,7 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // XỬ LÝ LINK RIÊNG TỪNG ẢNH
+                // 1. Logic nhảy link khi vào trang (Dành cho SEO/Chia sẻ)
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -32,6 +32,7 @@
                     }
                 }
 
+                // 2. Logic tự động cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -47,32 +48,23 @@
         }
     </script>
     <style type="text/css">
+        /* RESET TOÀN BỘ VỀ CHẾ ĐỘ MÁY TÍNH CHUẨN */
         html, body { 
-            width: 100%; height: 100%; margin: 0; padding: 0; 
-            overflow: hidden; background-color: #000; 
+            width: 100%; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #000; 
         }
 
-        /* LAPTOP: Giữ nguyên 100% */
         #viewer { 
-            width: 100%; height: 100%; 
-            position: absolute; top: 0; left: 0; z-index: 1;
-        }
-
-        /* ĐIỆN THOẠI DỌC: Ép khoảng trống an toàn cực lớn */
-        @media screen and (orientation: portrait) {
-            #viewer {
-                /* Ép tour chỉ cao 80% màn hình và đẩy xuống 12% từ trên cùng */
-                height: 80% !important; 
-                top: 12% !important; 
-                width: 100%;
-                /* Scale thêm một chút để cái 'ruột' nhỏ lại */
-                transform: scale(0.9);
-                transform-origin: center top;
-            }
-            body {
-                /* Tạo hiệu ứng mờ ảo cho vùng trống để nhìn không bị thô */
-                background: linear-gradient(180deg, #111 0%, #000 100%);
-            }
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: 1;
         }
     </style>
 </head>
