@@ -18,7 +18,21 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // 1. Đọc link khi vào trang
+                // --- FIX CHỮ TRÀN KHUNG (PHẦN RUỘT) ---
+                if(window.innerHeight > window.innerWidth) { 
+                    // Nếu là điện thoại dọc, ép toàn bộ hệ thống render nhỏ lại 30%
+                    // Cách này sẽ khiến chữ bên trong tự động co lại cho vừa khung
+                    setInterval(function() {
+                        var canvas = document.querySelector('canvas');
+                        if(canvas && !canvas.getAttribute('data-scaled')) {
+                            canvas.style.transform = "scale(0.7)"; 
+                            canvas.style.transformOrigin = "top center";
+                            canvas.setAttribute('data-scaled', 'true');
+                        }
+                    }, 500);
+                }
+
+                // XỬ LÝ LINK RIÊNG TỪNG ẢNH
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -32,7 +46,6 @@
                     }
                 }
 
-                // 2. Cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -52,28 +65,16 @@
             width: 100%; height: 100%; margin: 0; padding: 0; 
             overflow: hidden; background-color: #000; 
         }
-
         #viewer { 
             width: 100%; height: 100%; 
             position: absolute; top: 0; left: 0; z-index: 1;
+            display: flex; align-items: center; justify-content: center;
         }
-
-        /* FIX CHỐT HẠ CHO ĐIỆN THOẠI (DỌC) */
+        /* Ép khung chứa không được phép tràn */
         @media screen and (orientation: portrait) {
-            #viewer canvas { 
-                /* Ép cái hình bên trong không được to quá chiều rộng màn hình */
-                max-width: 100% !important;
-                max-height: 85% !important; 
-                object-fit: contain !important;
-                margin: auto;
-                top: 0; bottom: 0; left: 0; right: 0;
-            }
             #viewer {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100%;
-                background: #000;
+                height: 100vh;
+                width: 100vw;
             }
         }
     </style>
