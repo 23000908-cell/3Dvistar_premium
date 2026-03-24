@@ -18,7 +18,7 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // 1. Xử lý Link riêng từng ảnh
+                // 1. ĐỌC LINK KHI MỞ TRANG (Mở đúng ảnh từ link)
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -32,7 +32,7 @@
                     }
                 }
 
-                // 2. Cập nhật URL khi chuyển cảnh
+                // 2. TẠO LINK RIÊNG KHI CHUYỂN CẢNH
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -48,32 +48,33 @@
         }
     </script>
     <style type="text/css">
+        /* RESET CƠ BẢN */
         html, body { 
             width: 100%; height: 100%; margin: 0; padding: 0; 
             overflow: hidden; background-color: #000; 
         }
 
-        /* GIAO DIỆN CHUẨN (LAPTOP/MÀN NGANG) */
+        /* GIAO DIỆN LAPTOP (Đã ổn định) */
         #viewer { 
             width: 100%; height: 100%; 
             position: absolute; top: 0; left: 0; z-index: 1;
         }
 
-        /* FIX CHỐT HẠ CHO ĐIỆN THOẠI (DỌC) */
+        /* FIX CHỐT HẠ CHO ĐIỆN THOẠI (DỌC) - TRỊ LỖI CHỮ TO TRÀN KHUNG */
         @media screen and (orientation: portrait) {
             #viewer {
-                /* Ép toàn bộ khung và chữ bên trong thu nhỏ lại 15% */
-                transform: scale(0.85); 
-                transform-origin: center top; /* Thu nhỏ từ phía trên chính giữa */
+                /* Ép toàn bộ ruột bên trong nhỏ lại 20% để không bị tràn */
+                transform: scale(0.8); 
+                transform-origin: center top; 
                 
-                /* Bù trừ lại kích thước để không bị hở trắng */
-                width: 118%; 
-                height: 118%;
-                left: -9%; 
-                top: 4%;
+                /* Bù trừ kích thước để tour vẫn bao phủ màn hình mà không mất chữ */
+                width: 125%; 
+                height: 90%; 
+                left: -12.5%; 
+                top: 6%; /* Đẩy xuống 6% để tránh tai thỏ/thanh địa chỉ */
             }
             body {
-                background: #000; /* Đảm bảo nền luôn đen tuyệt đối */
+                background: #000;
             }
         }
     </style>
