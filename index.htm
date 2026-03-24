@@ -3,7 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         // BẢO MẬT: CHẶN CHUỘT PHẢI
@@ -21,7 +21,6 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // Cập nhật URL và nhảy cảnh
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -52,22 +51,28 @@
     <style type="text/css">
         html, body { 
             width: 100%; height: 100%; margin: 0; padding: 0; 
-            overflow: hidden; background-color: #000; 
+            overflow: hidden; background-color: #000;
+            -webkit-user-select: none; user-select: none;
         }
 
         #viewer { 
-            width: 100%; height: 100%; 
-            position: absolute; top: 0; left: 0; z-index: 1;
-            display: flex; align-items: center; justify-content: center;
+            position: absolute;
+            /* CHIÊU CUỐI: TẠO KHOẢNG TRỐNG AN TOÀN QUANH TOUR */
+            top: 40px;    /* Đẩy xuống dưới thanh địa chỉ */
+            left: 50px;   /* Đẩy lùi vào để chữ "Threads" không sát mép */
+            right: 50px;  /* Đẩy lùi vào để chữ "Heritage" hiện đủ */
+            bottom: 20px;
+            
+            /* Đảm bảo tour vẫn co giãn trong vùng an toàn này */
+            width: calc(100% - 100px); 
+            height: calc(100% - 60px);
+            z-index: 1;
         }
 
-        /* CHIÊU CUỐI: ÉP CANVAS PHẢI NẰM GỌN TRONG MÀN HÌNH MÁY TÍNH */
         canvas {
-            max-width: 100% !important;
-            max-height: 100% !important;
-            object-fit: contain !important; /* Đảm bảo không bao giờ bị cắt mép */
-            width: auto !important;
-            height: auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
         }
     </style>
 </head>
