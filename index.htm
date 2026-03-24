@@ -3,7 +3,7 @@
 <head>
     <title>Threads of Heritage - Pà Cò</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=contain" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <script src="lib/tdvplayer.js?v=1774121477535"></script>
     <script type="text/javascript">
         var player;
@@ -18,7 +18,7 @@
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
                 
-                // Đọc link khi vào trang
+                // 1. Xử lý Link riêng từng ảnh
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -32,7 +32,7 @@
                     }
                 }
 
-                // Cập nhật URL khi chuyển cảnh
+                // 2. Cập nhật URL khi chuyển cảnh
                 setInterval(function() {
                     try {
                         var idx = list.get('selectedIndex');
@@ -48,23 +48,33 @@
         }
     </script>
     <style type="text/css">
-        /* FIX LỖI MẤT CHỮ - PHƯƠNG ÁN CUỐI CÙNG */
         html, body { 
-            width: 100%; 
-            height: 100%; 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
-            background-color: #000; 
+            width: 100%; height: 100%; margin: 0; padding: 0; 
+            overflow: hidden; background-color: #000; 
         }
+
+        /* GIAO DIỆN CHUẨN (LAPTOP/MÀN NGANG) */
         #viewer { 
-            /* Thay vì dùng 100%, mình dùng 92% chiều cao để chừa chỗ cho chữ ở trên/dưới */
-            width: 100%; 
-            height: 92%; 
-            position: absolute; 
-            top: 4%; /* Đẩy tour xuống 4% để không bị lẹm chữ ở trên */
-            left: 0;
-            z-index: 1;
+            width: 100%; height: 100%; 
+            position: absolute; top: 0; left: 0; z-index: 1;
+        }
+
+        /* FIX CHỐT HẠ CHO ĐIỆN THOẠI (DỌC) */
+        @media screen and (orientation: portrait) {
+            #viewer {
+                /* Ép toàn bộ khung và chữ bên trong thu nhỏ lại 15% */
+                transform: scale(0.85); 
+                transform-origin: center top; /* Thu nhỏ từ phía trên chính giữa */
+                
+                /* Bù trừ lại kích thước để không bị hở trắng */
+                width: 118%; 
+                height: 118%;
+                left: -9%; 
+                top: 4%;
+            }
+            body {
+                background: #000; /* Đảm bảo nền luôn đen tuyệt đối */
+            }
         }
     </style>
 </head>
