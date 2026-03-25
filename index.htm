@@ -16,11 +16,11 @@
             settings.set(TDV.PlayerSettings.CONTAINER, document.getElementById('viewer'));
             settings.set(TDV.PlayerSettings.SCRIPT_URL, 'script.js?v=1774121477535');
             window.tdvplayer = player = TDV.PlayerAPI.create(settings);
-            
-            // Tự động nhảy cảnh từ URL nếu có
+
             player.bindOnObject('rootPlayer', 'start', function() {
                 var rp = player.getById('rootPlayer');
                 var list = rp.mainPlayList;
+                
                 var hash = window.location.hash;
                 if (hash.indexOf('#scene=') !== -1) {
                     var targetScene = decodeURIComponent(hash.replace('#scene=', ''));
@@ -33,6 +33,41 @@
                         }
                     }
                 }
+
+                // VÒNG LẶP LIÊN TỤC SỬA LỖI & CẬP NHẬT LINK
+                setInterval(function() {
+                    // 1. Cập nhật URL khi đổi cảnh
+                    try {
+                        var idx = list.get('selectedIndex');
+                        var currentMedia = list.get('items')[idx].get('media');
+                        var sceneName = currentMedia.get('name') || currentMedia.get('label');
+                        if (sceneName && sceneName !== window.lastScene) {
+                            window.lastScene = sceneName;
+                            window.location.hash = "scene=" + encodeURIComponent(sceneName);
+                        }
+                    } catch (e) {}
+
+                    // 2. JS ĐẶC TRỊ LỖI CHỮ "THREADS OF HERITAGE"
+                    try {
+                        // Xử lý nếu logo là đoạn Text
+                        var textElements = document.querySelectorAll('#viewer div, #viewer span');
+                        for (var i = 0; i < textElements.length; i++) {
+                            var textContent = textElements[i].innerText || textElements[i].textContent;
+                            if (textContent && textContent.includes('Threads of Heritage')) {
+                                textElements[i].style.maxWidth = '90vw'; /* Ép rộng tối đa 90% màn hình */
+                                textElements[i].style.whiteSpace = 'normal'; /* Cho phép rớt xuống dòng nếu dài quá */
+                                textElements[i].style.wordBreak = 'break-word';
+                            }
+                        }
+                        // Xử lý nếu logo là hình Ảnh
+                        var imgElements = document.querySelectorAll('#viewer img');
+                        for (var j = 0; j < imgElements.length; j++) {
+                            imgElements[j].style.maxWidth = '90vw';
+                            imgElements[j].style.objectFit = 'contain';
+                        }
+                    } catch (e) {}
+
+                }, 500); // Chạy lệnh mỗi nửa giây để đảm bảo 3DVista không tự làm tràn chữ lại
             });
         }
     </script>
@@ -43,17 +78,10 @@
             -webkit-user-select: none; user-select: none;
         }
 
+        /* Giao diện 100% chuẩn, không bóp méo tour */
         #viewer { 
             width: 100%; height: 100%; 
             position: absolute; top: 0; left: 0; z-index: 1;
-            /* Tạo lề ảo cực mỏng để ép 3DVista không dán chữ sát mép */
-            box-sizing: border-box;
-            padding: 10px; 
-        }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
         }
     </style>
 </head>
